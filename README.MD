@@ -30,4 +30,12 @@ Link Homekit to your Gree air conditioner(YB0F2) using Raspberry Pi.
 
 ## Snapshots
 
-![MainPage](resources/images/MainPage.jpg)![Mode](resources/images/Mode.jpg)![Temperature](resources/images/Temperature.jpg)![FanSpeed](resources/images/FanSpeed.jpg)
+<figure class="half">
+    <img src="https://raw.githubusercontent.com/suikammd/AirConditioner-Homekit/master/resources/images/MainPage.jpg">
+    <img src="https://raw.githubusercontent.com/suikammd/AirConditioner-Homekit/master/resources/images/Mode.jpg">
+</figure>
+
+<figure class="half">
+    <img src="https://raw.githubusercontent.com/suikammd/AirConditioner-Homekit/master/resources/images/Temperature.jpg">
+    <img src="https://raw.githubusercontent.com/suikammd/AirConditioner-Homekit/master/resources/images/FanSpeed.jpg">
+</figure>
