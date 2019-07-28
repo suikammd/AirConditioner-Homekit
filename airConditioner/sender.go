@@ -2,6 +2,7 @@ package airConditioner
 
 import (
 	"fmt"
+	"github.com/brutella/hc/characteristic"
 	"log"
 	"net"
 	"os"
@@ -9,9 +10,9 @@ import (
 )
 
 const (
-	OFF  = 0
-	HEAT = 1
-	COOL = 2
+	OFF  = characteristic.CurrentHeatingCoolingStateOff
+	HEAT = characteristic.CurrentHeatingCoolingStateHeat
+	COOL = characteristic.CurrentHeatingCoolingStateCool
 )
 
 const (
@@ -54,24 +55,24 @@ func (ac *ACRemoteController) generateCommand() (command string) {
 	return
 }
 
-func sendCommand(command string) (isSucc bool) {
-	const PROFILE = "air"
-	const UNIXFILE = "/var/run/lirc/lircd"
+func sendCommand(command string) (isSuccessful bool) {
+	const Profile = "air"
+	const LircdUnixFile = "/var/run/lirc/lircd"
 
-	logger := log.New(os.Stdout, "LIRC-"+PROFILE, log.Ldate|log.Ltime)
+	logger := log.New(os.Stdout, "[Lircd-"+Profile+"]", log.Ldate|log.Ltime)
 	logger.Println("send command ", command)
-	addr, err := net.ResolveUnixAddr("unix", UNIXFILE)
+	addr, err := net.ResolveUnixAddr("unix", LircdUnixFile)
 	if err != nil {
-		logger.Println("cannot resolve address "+UNIXFILE, err)
+		logger.Println("cannot resolve address "+LircdUnixFile, err)
 		return
 	}
 	c, err := net.DialUnix("unix", nil, addr)
 	if err != nil {
-		logger.Println("cannot dial unix socket "+UNIXFILE, err)
+		logger.Println("cannot dial unix socket "+LircdUnixFile, err)
 		return
 	}
 	defer c.Close()
-	_, err = c.Write([]byte("SEND_ONCE " + PROFILE + " " + command + "\n"))
+	_, err = c.Write([]byte("SEND_ONCE " + Profile + " " + command + "\n"))
 	if err != nil {
 		logger.Println("cannot write command to socket", err)
 		return
@@ -83,7 +84,7 @@ func sendCommand(command string) (isSucc bool) {
 		return
 	}
 	logger.Println(string(buf[0:nr]))
-	isSucc = true
+	isSuccessful = true
 	return
 }
 
@@ -92,13 +93,13 @@ func initDefaultACRemoteController() *ACRemoteController {
 		mode:        OFF,
 		temperature: 0,
 		fanSpeed:    0,
-		logger:      log.New(os.Stdout, "ACRemoteController", log.Ldate|log.Ltime),
+		logger:      log.New(os.Stdout, "[ACRemoteController]", log.Ldate|log.Ltime),
 	}
 }
 
 func (ac *ACRemoteController) updateTargetTemperature(temp float64) {
 	if temp < MinTemperature || temp > MaxTemperature {
-		ac.logger.Println("Invalid temperature")
+		ac.logger.Println("invalid temperature")
 		return
 	}
 
