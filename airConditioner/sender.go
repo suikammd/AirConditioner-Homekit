@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"sync"
+	"time"
 )
 
 const (
@@ -27,12 +28,15 @@ const (
 	DefaultSpeed = 0
 )
 
+const autoPowerOnDuration = 10
+
 type ACRemoteController struct {
 	mode                int
 	temperature         int
 	fanSpeed            int
 	temperatureCallBack func(float64)
 	modeCallback        func(int)
+	lastPowerOff        time.Time
 
 	lock   sync.Mutex
 	logger *log.Logger
@@ -90,10 +94,11 @@ func sendCommand(command string) (isSuccessful bool) {
 
 func initDefaultACRemoteController() *ACRemoteController {
 	return &ACRemoteController{
-		mode:        OFF,
-		temperature: 0,
-		fanSpeed:    0,
-		logger:      log.New(os.Stdout, "[ACRemoteController]", log.Ldate|log.Ltime),
+		mode:         OFF,
+		temperature:  0,
+		fanSpeed:     0,
+		lastPowerOff: time.Now(),
+		logger:       log.New(os.Stdout, "[ACRemoteController]", log.Ldate|log.Ltime),
 	}
 }
 
@@ -106,6 +111,12 @@ func (ac *ACRemoteController) updateTargetTemperature(temp float64) {
 	ac.lock.Lock()
 	defer ac.lock.Unlock()
 
+	// Change temperature in power-off mode and just powered-off
+	if ac.mode == OFF && time.Now().Sub(ac.lastPowerOff) < autoPowerOnDuration*time.Second {
+		return
+	}
+
+	// Auto power-on when change temperature
 	if ac.mode == OFF {
 		ac.mode = COOL
 	}
@@ -131,6 +142,10 @@ func (ac *ACRemoteController) updateTargetHeatingCoolingState(mode int) {
 
 	if ac.mode == mode {
 		return
+	}
+
+	if ac.mode == OFF {
+		ac.lastPowerOff = time.Now()
 	}
 
 	if ac.temperature < MinTemperature || ac.temperature > MaxTemperature {
