@@ -20,6 +20,7 @@ const (
 	MinTemperature     = 22
 	MaxTemperature     = 27
 	DefaultTemperature = 25
+	DefaultMode        = HEAT
 )
 
 const (
@@ -118,7 +119,7 @@ func (ac *ACRemoteController) updateTargetTemperature(temp float64) {
 
 	// Auto power-on when change temperature
 	if ac.mode == OFF {
-		ac.mode = COOL
+		ac.mode = DefaultMode
 	}
 
 	if ac.temperature == int(temp) {

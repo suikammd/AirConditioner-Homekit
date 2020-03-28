@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./airConditioner"
 	"flag"
+	"github.com/suikammd/AirConditioner-Homekit/airConditioner"
 )
 
 var storage string
